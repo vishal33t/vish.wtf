@@ -1,12 +1,42 @@
-import fs from 'fs';
-import path from 'path';
-const TYPES: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
-export async function GET(_: Request, { params }: { params: Promise<{ name: string }> }) {
+
+import { supabase } from '@/lib/supabase';
+
+const TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+};
+
+export async function GET(
+  _: Request,
+  { params }: { params: Promise<{ name: string }> }
+) {
   const { name } = await params;
-  const m = /^[a-f0-9]{16}\.(jpg|png|webp)$/.exec(name); // strict pattern: no path tricks possible
-  if (!m) return new Response('Not found', { status: 404 });
+
+  const match = /^[a-f0-9]{16}\.(jpg|png|webp)$/.exec(name);
+
+  if (!match) {
+    return new Response('Not found', { status: 404 });
+  }
+
   try {
-    const data = fs.readFileSync(path.join(process.cwd(), 'data', 'uploads', name));
-    return new Response(new Uint8Array(data), { headers: { 'content-type': TYPES[m[1]], 'cache-control': 'public, max-age=31536000, immutable', 'x-content-type-options': 'nosniff' } });
-  } catch { return new Response('Not found', { status: 404 }); }
+    const { data, error } = await supabase.storage
+      .from('project-images')
+      .download(name);
+
+    if (error || !data) {
+      return new Response('Not found', { status: 404 });
+    }
+
+    return new Response(data, {
+      headers: {
+        'Content-Type': TYPES[match[1]],
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  } catch (error) {
+    console.error('Image retrieval failed:', error);
+    return new Response('Image retrieval failed', { status: 500 });
+  }
 }
