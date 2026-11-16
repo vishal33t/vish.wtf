@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const pr = getContent().projects.find(p => p.slug === slug && p.published);
+  const content = await getContent();
+const pr = content.projects.find(p => p.slug === slug && p.published);
   if (!pr) notFound();
   const parts: [string, string][] = [['The problem', pr.problem], ['The solution', pr.solution], ['Architecture', pr.architecture], ['Technical decisions', pr.decisions], ['Challenges', pr.challenges], ['Results', pr.results]];
   return (
