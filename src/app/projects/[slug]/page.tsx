@@ -23,6 +23,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           {pr.github && <a className="btn" href={pr.github} target="_blank" rel="noopener noreferrer">GitHub</a>}
           {pr.live && <a className="link" href={pr.live} target="_blank" rel="noopener noreferrer">Live demo</a>}
         </div>
+        {pr.images?.length > 0 && <div className="gallery">{pr.images.map(im => <img key={im} src={`/api/img/${im}`} alt={`${pr.title} screenshot`} loading="lazy" />)}</div>}
         {parts.filter(([, v]) => v.trim()).map(([h, v]) => (<section key={h} className="case-part"><h2>{h}</h2>{v.split(/\n\s*\n/).map((t, i) => <p key={i}>{t}</p>)}</section>))}
       </main>
     </>

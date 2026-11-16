@@ -50,9 +50,12 @@ export default function Home() {
                 </div>
               </div>
               <Tilt className="plate">
-                <div className="layer l0" style={{ ['--a' as string]: `${15 + i * 41}deg` }} />
-                <div className="layer l1"><b>{pr.title}</b></div>
-                <div className="layer l2" aria-hidden="true">{pr.tech.slice(0, 3).map(t => <i key={t}>{t}</i>)}</div>
+                {pr.images?.[0] ? (<>
+                  <div className="layer l0 cover"><img src={`/api/img/${pr.images[0]}`} alt={`${pr.title} screenshot`} loading="lazy" /></div>
+                  <div className="layer l2 tag"><b>{pr.title}</b></div></>) : (<>
+                  <div className="layer l0" style={{ ['--a' as string]: `${15 + i * 41}deg` }} />
+                  <div className="layer l1"><b>{pr.title}</b></div>
+                  <div className="layer l2" aria-hidden="true">{pr.tech.slice(0, 3).map(t => <i key={t}>{t}</i>)}</div></>)}
               </Tilt>
             </article>
           ))}

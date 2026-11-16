@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { defaults, type Content } from '@/data/defaults';
+import { defaults, type Content, type Project } from '@/data/defaults';
 
 const dir = path.join(process.cwd(), 'data');
 let db: Database.Database | null = null;
@@ -24,6 +24,7 @@ export function getContent(): Content {
     const row = d.prepare('SELECT value FROM content WHERE key = ?').get(k) as { value: string } | undefined;
     if (row) { try { out[k] = JSON.parse(row.value); } catch { /* keep default */ } }
   }
+  out.projects = (out.projects as Project[]).map(p => ({ ...p, images: Array.isArray(p.images) ? p.images : [] }));
   return out as Content;
 }
 export function saveContent(c: Content) {

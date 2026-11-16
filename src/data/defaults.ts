@@ -2,7 +2,7 @@
 // (data/vish.db) and is edited at /admin. Delete the db file to re-seed from here.
 export type Project = {
   slug: string; title: string; status: 'In progress' | 'Completed' | 'Concept'; published: boolean;
-  summary: string; tech: string[]; github: string; live: string;
+  summary: string; tech: string[]; github: string; live: string; images: string[];
   problem: string; solution: string; architecture: string; decisions: string; challenges: string; results: string;
 };
 export type Content = {
@@ -12,7 +12,7 @@ export type Content = {
   certifications: string[];
   projects: Project[];
 };
-const empty = { problem: '', solution: '', architecture: '', decisions: '', challenges: '', results: '' };
+const empty = { images: [] as string[], problem: '', solution: '', architecture: '', decisions: '', challenges: '', results: '' };
 export const defaults: Content = {
   profile: {
     name: 'Vishal Singh', role: 'Full Stack Developer',

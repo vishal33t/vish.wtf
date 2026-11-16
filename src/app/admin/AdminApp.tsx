@@ -5,7 +5,7 @@ import type { Content, Project } from '@/data/defaults';
 type Note = { id: number; section: string; name: string; text: string; approved: number; created_at: string };
 type Tab = 'profile' | 'projects' | 'skills' | 'education' | 'notes';
 const list = (s: string) => s.split(',').map(x => x.trim()).filter(Boolean);
-const blank = (): Project => ({ slug: 'new-project', title: 'New project', status: 'Concept', published: false, summary: '', tech: [], github: '', live: '', problem: '', solution: '', architecture: '', decisions: '', challenges: '', results: '' });
+const blank = (): Project => ({ slug: 'new-project', title: 'New project', status: 'Concept', published: false, summary: '', tech: [], github: '', live: '', images: [], problem: '', solution: '', architecture: '', decisions: '', challenges: '', results: '' });
 
 function F({ label, value, onChange, area, hint }: { label: string; value: string; onChange: (v: string) => void; area?: boolean; hint?: string }) {
   return (<label className="f"><span>{label}</span>{area ? <textarea rows={4} value={value} onChange={e => onChange(e.target.value)} /> : <input value={value} onChange={e => onChange(e.target.value)} />}{hint && <small>{hint}</small>}</label>);
@@ -33,6 +33,15 @@ export default function AdminApp({ enabled, authed, initial }: { enabled: boolea
     setMsg('Saving…');
     const r = await fetch('/api/admin/content', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(c) });
     if (r.ok) { saved.current = JSON.stringify(c); setMsg('Saved. The public site is updated.'); } else setMsg((await r.json()).error);
+  }
+  async function upload(i: number, files: FileList | null) {
+    if (!files || !c) return; const added: string[] = [];
+    for (const f of Array.from(files)) {
+      const fd = new FormData(); fd.append('file', f);
+      const r = await fetch('/api/admin/upload', { method: 'POST', body: fd }); const d = await r.json();
+      if (r.ok) added.push(d.name); else setMsg(`${f.name}: ${d.error}`);
+    }
+    if (added.length) setC(cur => cur && { ...cur, projects: cur.projects.map((p, j) => j === i ? { ...p, images: [...(p.images ?? []), ...added] } : p) });
   }
   async function logout() { await fetch('/api/admin/logout', { method: 'POST' }); setOk(false); setC(null); setPw(''); setMsg(''); }
   async function approve(id: number, approved: boolean) { await fetch('/api/admin/notes', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id, approved }) }); loadNotes(); }
@@ -78,6 +87,12 @@ export default function AdminApp({ enabled, authed, initial }: { enabled: boolea
                 <F label="summary" area value={p.summary} onChange={v => setPr(i, { summary: v })} />
                 <F label="technologies" value={p.tech.join(', ')} onChange={v => setPr(i, { tech: list(v) })} hint="Separate with commas." />
                 <div className="two-col"><F label="GitHub URL" value={p.github} onChange={v => setPr(i, { github: v })} /><F label="Live demo URL" value={p.live} onChange={v => setPr(i, { live: v })} /></div>
+                <div className="f"><span>Screenshots</span>
+                  <div className="thumbs">{(p.images ?? []).map((im, k) => (<figure key={im}><img src={`/api/img/${im}`} alt="" />
+                    <figcaption>{k === 0 ? 'Cover' : <button className="mini" onClick={() => setPr(i, { images: [im, ...p.images.filter(x => x !== im)] })}>Make cover</button>}
+                      <button className="mini danger" onClick={() => setPr(i, { images: p.images.filter(x => x !== im) })}>Remove</button></figcaption></figure>))}</div>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={e => { upload(i, e.target.files); e.target.value = ''; }} />
+                  <small>PNG, JPG or WebP, up to 5 MB each. The first image is the cover on the homepage. Press Save changes afterwards.</small></div>
                 {(['problem', 'solution', 'architecture', 'decisions', 'challenges', 'results'] as const).map(k => <F key={k} label={k} area value={p[k]} onChange={v => setPr(i, { [k]: v })} hint="Empty sections are hidden on the case-study page." />)}
                 <div className="btn-row"><button className="mini" onClick={() => move(i, -1)}>Move up</button><button className="mini" onClick={() => move(i, 1)}>Move down</button>
                   <button className="mini danger" onClick={() => confirm('Delete this project?') && (setC({ ...c, projects: c.projects.filter((_, j) => j !== i) }), setOpen(-1))}>Delete</button></div>
