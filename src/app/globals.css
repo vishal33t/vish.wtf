@@ -89,3 +89,8 @@ body:has(.dash) .world{display:none}.check span{text-transform:none}
 .l2.tag{inset:auto auto 8% -6%;width:auto;height:auto;padding:.6rem 1rem;transform:translateZ(70px)}.l2.tag b{font-size:1.1rem;font-weight:800;font-variation-settings:'wdth' 80}
 .gallery{display:grid;gap:1.4rem;margin-top:2.5rem}.gallery img{width:100%;height:auto;border:1px solid var(--ink);box-shadow:8px 8px 0 rgba(15,30,43,.12);background:var(--sheet)}
 .thumbs{display:flex;flex-wrap:wrap;gap:.8rem;margin:.4rem 0}.thumbs figure{margin:0;width:11rem;border:1px solid var(--ink);background:var(--sheet)}.thumbs img{width:100%;height:7rem;object-fit:cover;object-position:top;display:block}.thumbs figcaption{display:flex;gap:.3rem;flex-wrap:wrap;padding:.4rem;font-size:.85rem;font-weight:600}
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
